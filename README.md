@@ -2,11 +2,10 @@
 
 
 
-
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>UKRW • Metropolitan Police Application</title>
+  <title>Metropolitan Police Application</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -93,6 +92,11 @@
       font-size: 0.9rem;
       opacity: 0.8;
     }
+    .soon {
+      margin-top: 15px;
+      font-size: 1rem;
+      opacity: 0.9;
+    }
   </style>
 </head>
 <body>
@@ -160,6 +164,7 @@
     </form>
 
     <div id="resultBox" class="resultBox"></div>
+    <div id="soon" class="soon"></div>
     <div id="countdown" class="countdown"></div>
   </div>
 
@@ -209,7 +214,9 @@
 
       const resultBox = document.getElementById("resultBox");
       const countdown = document.getElementById("countdown");
+      const soon = document.getElementById("soon");
 
+      // Show AI result
       resultBox.style.display = "block";
 
       if (ai.decision === "Accept") {
@@ -220,7 +227,13 @@
         resultBox.innerHTML = "❌ <strong>We advise you to DECLINE this applicant.</strong><br><br>Reason: " + ai.reason;
       }
 
-      // Disable form to prevent spam
+      // Show "results will be given shortly"
+      soon.innerHTML = "📨 Your results will be given out shortly.";
+
+      // Clear all answers from screen
+      document.getElementById("applicationForm").reset();
+
+      // Disable all inputs to prevent spam
       document.querySelectorAll("input, textarea, select, button").forEach(el => el.disabled = true);
 
       // Auto-refresh countdown
@@ -236,6 +249,7 @@
         }
       }, 1000);
 
+      // Send to webhook
       const data = {
         username: "Metropolitan Police • Applications",
         embeds: [
