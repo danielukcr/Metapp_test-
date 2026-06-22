@@ -1,8 +1,12 @@
 
+
+
+
+
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Metropolitan Police Application</title>
+  <title>UKRW • Metropolitan Police Application</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -84,6 +88,11 @@
       background: #7f1d1d;
       border-color: #ef4444;
     }
+    .countdown {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
   </style>
 </head>
 <body>
@@ -95,6 +104,17 @@
     </div>
 
     <form id="applicationForm">
+
+      <fieldset>
+        <legend>Discord Information</legend>
+
+        <label>Discord Username</label>
+        <input type="text" id="discord_username" placeholder="e.g. AVG#0001" required>
+
+        <label>Discord ID</label>
+        <input type="text" id="discord_id" placeholder="e.g. 123456789012345678" required>
+      </fieldset>
+
       <fieldset>
         <legend>Personal information</legend>
 
@@ -140,6 +160,7 @@
     </form>
 
     <div id="resultBox" class="resultBox"></div>
+    <div id="countdown" class="countdown"></div>
   </div>
 
   <script>
@@ -147,17 +168,14 @@
       let score = 0;
       let reasons = [];
 
-      // Experience scoring
       if (exp.length > 120) score += 2;
       else if (exp.length > 60) score += 1;
-      else reasons.push("Your experience section lacks detail.");
+      else reasons.push("Experience section lacks detail.");
 
-      // Why should we pick you scoring
       if (why.length > 150) score += 2;
       else if (why.length > 80) score += 1;
-      else reasons.push("Your reasoning for joining is too short.");
+      else reasons.push("Reasoning for joining is too short.");
 
-      // Age group check
       if (ageGroup === "Under 13") {
         return {
           decision: "Decline",
@@ -165,7 +183,6 @@
         };
       }
 
-      // Final decision
       if (score >= 3) {
         return {
           decision: "Accept",
@@ -191,6 +208,8 @@
       const ai = evaluateApplication(exp, why, ageGroup);
 
       const resultBox = document.getElementById("resultBox");
+      const countdown = document.getElementById("countdown");
+
       resultBox.style.display = "block";
 
       if (ai.decision === "Accept") {
@@ -201,24 +220,50 @@
         resultBox.innerHTML = "❌ <strong>We advise you to DECLINE this applicant.</strong><br><br>Reason: " + ai.reason;
       }
 
+      // Disable form to prevent spam
+      document.querySelectorAll("input, textarea, select, button").forEach(el => el.disabled = true);
+
+      // Auto-refresh countdown
+      let timeLeft = 10;
+      countdown.innerHTML = "Refreshing in " + timeLeft + " seconds...";
+
+      const timer = setInterval(() => {
+        timeLeft--;
+        countdown.innerHTML = "Refreshing in " + timeLeft + " seconds...";
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          location.reload();
+        }
+      }, 1000);
+
       const data = {
         username: "Metropolitan Police • Applications",
         embeds: [
           {
-            title: "📋 New Metropolitan Police Application",
+            title: "📂 Metropolitan Police Application — Advanced Review",
+            description: "**Run the command `/app-result` to let them know if they passed or failed.**",
             color: ai.decision === "Accept" ? 5763719 : 15548997,
+            thumbnail: {
+              url: "https://i.imgur.com/8fK4h7N.png"
+            },
             fields: [
-              { name: "Roblox Username", value: document.getElementById("roblox_username").value },
-              { name: "Roblox ID", value: document.getElementById("roblox_id").value },
-              { name: "Roblox Age Group", value: ageGroup },
-              { name: "Real Age", value: document.getElementById("real_age").value },
-              { name: "Roleplay Name", value: document.getElementById("rp_name").value },
-              { name: "Roleplay Age", value: document.getElementById("rp_age").value },
+              { name: "👤 Discord Username", value: document.getElementById("discord_username").value, inline: true },
+              { name: "🆔 Discord ID", value: document.getElementById("discord_id").value, inline: true },
+
+              { name: "Roblox Username", value: document.getElementById("roblox_username").value, inline: true },
+              { name: "Roblox ID", value: document.getElementById("roblox_id").value, inline: true },
+              { name: "Roblox Age Group", value: ageGroup, inline: true },
+              { name: "Real Age", value: document.getElementById("real_age").value, inline: true },
+
+              { name: "Roleplay Name", value: document.getElementById("rp_name").value, inline: true },
+              { name: "Roleplay Age", value: document.getElementById("rp_age").value, inline: true },
+
               { name: "Past Experience", value: exp },
               { name: "Why Should We Pick You?", value: why },
+
               { name: "AI Recommendation", value: `We advise you to **${ai.decision.toUpperCase()}**.\nReason: ${ai.reason}` }
             ],
-            footer: { text: "Metropolitan Police Recruitment" }
+            footer: { text: "Metropolitan Police Recruitment • Automated Review System" }
           }
         ]
       };
